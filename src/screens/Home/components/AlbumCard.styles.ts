@@ -36,4 +36,5 @@ export const styles = StyleSheet.create({
       fontSize: 16,
       // Add styles for individual song titles
     },
+    
   });

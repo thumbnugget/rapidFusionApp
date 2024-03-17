@@ -26,7 +26,7 @@ const Card: React.FC<CardProps> = ({
       {imageUrl && typeof imageUrl === 'string' ? (
         <Image source={{ uri: imageUrl }} style={styles.cardImage} resizeMode="cover" />
       ) : imageUrl && typeof imageUrl === 'number' ? (
-        <Image source={imageUrl} style={styles.cardImage} resizeMode="cover" />
+        <Image source={imageUrl} style={styles.cardImage} resizeMode="contain" />
       ) : null}
       <PaperCard.Content>
         <Text style={[fonts.bold, contentStyle]}>{content}</Text> 

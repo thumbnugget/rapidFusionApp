@@ -9,20 +9,23 @@ export const styles = StyleSheet.create({
       },
       container: {
         padding: 10,
+        color: '#000',
       },
       title: {
         fontWeight: 'bold',
         fontSize: 24,
         marginBottom: 20,
+        color: '#000',
       },
       lyrics: {
         fontSize: 19,
-        lineHeight: 24, // Adjust line height for readability
-        // Any additional styling for the lyrics text
+        lineHeight: 24, 
+        color: '#000',
       },
       // Add more styles as needed, for example:
       verse: {
         marginBottom: 10,
+        color: '#000',
       },
       chorus: {
         fontWeight: 'bold',
@@ -30,12 +33,12 @@ export const styles = StyleSheet.create({
       },
       lyricsContainer: {
         marginTop: 10,
-        // Style the container that holds all lyrics lines
+       color: '#000',
       },
       lyricsLine: {
-        fontSize: 16,
-        lineHeight: 24, // Adjust for readability
-        // Additional styling for each lyrics line
+        fontSize: 18,
+        lineHeight: 24, 
+        color: '#000',
       },
       titleContainer: {
         // Container for the title, might include padding or alignment

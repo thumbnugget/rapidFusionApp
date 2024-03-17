@@ -1,4 +1,4 @@
-export const albumsLyrics = {
+export const albumsLyrics: AlbumLyrics  = {
     'Life Elusive': {
      'As The Sun': [
             "A sparkling badge of self recrimination",
@@ -341,4 +341,10 @@ export const albumsLyrics = {
             "pain today does not feel the same",
         ].join('\n'),
     },
+  };
+
+  type AlbumLyrics = {
+    [key: string]: {
+      [songTitle: string]: string;
+    };
   };

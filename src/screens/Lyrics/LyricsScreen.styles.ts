@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
       title: {
         fontSize: 24,
         fontWeight: 'bold',
+        color: '#000',
       },
       lyrics: {
         fontSize: 18,
