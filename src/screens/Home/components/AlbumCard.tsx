@@ -14,9 +14,8 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ title, content, imageUrl, songTit
     setIsExpanded(!isExpanded);
   };
 
-  const handleLyricsPress = () => {
-    
-    navigation.navigate('Lyrics', { albumTitle: title });
+  const handleLyricsPress = (albumTitle: string) => {
+    navigation.navigate('Lyrics', { albumTitle });
   };
   return (
     <Card title={title} content={content} imageUrl={imageUrl}>

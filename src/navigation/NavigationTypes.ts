@@ -1,7 +1,10 @@
 // NavigationTypes.ts
 export type HomeStackParamList = {
   HomeScreen: undefined;  // The main screen showing albums
-  Lyrics: { albumTitle: string };  // The screen showing lyrics for a selected album
+  Lyrics: {
+    albumTitle: string;
+   
+  };
 };
 
 export type BottomTabParamList = {
