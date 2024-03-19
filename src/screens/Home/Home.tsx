@@ -9,13 +9,16 @@ import AppHeader from '../../core/components/Header/AppHeader';
 import { useNavigation } from '@react-navigation/native';
 import { albumsLyrics } from '../Lyrics/data/lyricsData';
 import LyricsModal from '../../core/components/Modal/LyricsModal';
-import { Button } from 'react-native-paper';
+// import { Button } from 'react-native-paper';
 import { useLyricsContext } from '../../context/LyricsContext';
+import Button from '../../core/components/Button/Button';
+import QuizIcon from '../../assets/icons/quiz_black_24dp.svg';
 
 const Home: React.FC<{ navigation: HomeScreenNavigationProp }> = ({ navigation }) => {
   const albumImage: ImageURISource | number = require('../../assets/forApp.png');
   const imageUrl: string | number = typeof albumImage === 'number' ? albumImage : albumImage.uri || '';
   const [modalVisible, setModalVisible] = useState(false);
+  
 // Import local images
 const forAppImage = require('../../assets/forApp.png');
 const diegressImage = require('../../assets/DiegressCoverScan1400.png');
@@ -52,10 +55,8 @@ const { setSelectedSongTitle } = useLyricsContext();
       <AppHeader title="Home" />
     <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
-     
-      <Button mode="contained" onPress={toggleModal}>
-            Test Modal
-          </Button>
+       
+      
         <AlbumCard
           title="Life Elusive"
           content=""
@@ -85,7 +86,14 @@ const { setSelectedSongTitle } = useLyricsContext();
         onGo={handleGo}
         lyricsData={albumsLyrics} // Pass your lyrics data to the modal
       />
+       <Button 
+        title="Song Quiz" 
+        onPress={toggleModal}
+        icon={() => <QuizIcon />} 
+        mode="outlined"  style={styles.quizButton}
+      />
     </ScrollView>
+    
   </View>
   );
 };

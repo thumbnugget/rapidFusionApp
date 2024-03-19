@@ -8,9 +8,10 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
       },
-      // card: {
-      //   width: '90%',
-      //   marginVertical: 10,
-      // },
+     quizButton: {
+        marginRight: 30,
+        marginLeft: 30,
+
+     },
      
   });

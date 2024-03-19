@@ -28,21 +28,24 @@ const LyricsScreen: React.FC<LyricsScreenProps> = ({ route }) => {
   // Get the lyrics for the current album
   const currentAlbumLyrics = albumsLyrics[albumTitle] || {};
 
-  const lyricsRefs = useRef(
-    Object.keys(currentAlbumLyrics).reduce((acc, songTitle) => {
+  type LyricsRefs = { [key: string]: React.RefObject<View> };
+  const lyricsRefs = useRef<LyricsRefs>(
+    Object.keys(currentAlbumLyrics).reduce((acc: LyricsRefs, songTitle: string) => {
       acc[songTitle] = React.createRef<View>();
       return acc;
-    }, {} as { [key: string]: React.RefObject<View> })
+    }, {})
   );
 
   useEffect(() => {
-    if (selectedSongTitle && lyricsRefs.current[selectedSongTitle]?.current) {
+    if (selectedSongTitle && lyricsRefs.current[selectedSongTitle]?.current && scrollViewRef.current) {
       setTimeout(() => {
-        lyricsRefs.current[selectedSongTitle].current?.measure((fx, fy, width, height, px, py) => {
-          // Use the 'py' value which gives the Y offset from the parent (ScrollView)
-          // Adjust as necessary for padding/margins
-          scrollViewRef.current?.scrollTo({ y: py + 20, animated: true });
-        });
+        lyricsRefs.current[selectedSongTitle].current?.measureLayout(
+          scrollViewRef.current as unknown as number,
+          (x, y, width, height) => {
+            scrollViewRef.current?.scrollTo({ y: y - 50, animated: true }); // Adjust y for header and padding
+          },
+          () => {} // Error callback, can be omitted or used for error handling
+        );
       }, 300); // Adjust the timeout as needed
     }
   }, [selectedSongTitle]);
@@ -66,7 +69,7 @@ const LyricsScreen: React.FC<LyricsScreenProps> = ({ route }) => {
       <LyricsCard songTitle={songTitle} 
       lyrics={lyrics} 
       isExpanded={selectedSongTitle === songTitle}
-      onToggle={toggleCardExpansion}
+      onToggle={() => toggleCardExpansion(songTitle)}
      />
     </View>
   ))}
@@ -82,9 +85,5 @@ type AlbumTitle = keyof typeof albumsLyrics;
 
 interface LyricsScreenProps {
   route: LyricsScreenRouteProp;
-  // route: {
-  //   params: {
-  //     albumTitle: AlbumTitle;
-  //   };
-  // };
+  
   }

@@ -8,6 +8,10 @@ export type HomeStackParamList = {
 };
 
 export type BottomTabParamList = {
-  HomeTab: undefined;  // The tab that contains the HomeStackNavigator
-  Media: undefined;  // The tab for the Media screen (or placeholder for now)
+  HomeTab: undefined;  
+  Media: undefined; 
+  
+};
+export type RootStackParamList = {
+  BottomTabs: undefined; 
 };

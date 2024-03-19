@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { styles } from './LyricsModal.styles';
 
@@ -33,18 +33,21 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ visible, onClose, onGo, lyric
         songTitle: randomSongTitle,
         lyricLine: randomLine, // Store the selected line
       });
+      console.log(`Modal opened with song: ${randomSongTitle} from album: ${randomAlbumTitle}`);
+   
     }
   }, [visible, lyricsData]);
 
   const handleHintPress = () => {
     setShowHint(true); 
+    console.log('Hint button pressed.');
   };
 
   const resetModalState = () => {
     setSelectedSong(null);
     setShowHint(false);
-    // Reset other state variables as needed
-  };
+    console.log('Modal state reset.');
+  }
 
   // Effect to reset state when modal is hidden
   React.useEffect(() => {
@@ -55,21 +58,25 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ visible, onClose, onGo, lyric
 
   // Handle closing the modal and resetting state
   const handleNotNow = () => {
+    console.log('Not Now button pressed.');
     resetModalState();
-    onClose(); // Invoke onClose prop after state is reset
+    onClose(); 
   };
 
   // Handle "Go" action and reset state
   const handleGo = () => {
+    console.log('Go button pressed with song: ' + (selectedSong ? selectedSong.songTitle : 'No song selected'));
+    
     if (selectedSong) {
-      resetModalState(); // Reset state before invoking onGo
       onGo(selectedSong.albumTitle, selectedSong.songTitle);
+      resetModalState(); 
     }
   };
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalView}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Text style={styles.questionText}>Do you know what song this line is from?</Text>
         {selectedSong && (
           <>
@@ -77,6 +84,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ visible, onClose, onGo, lyric
             {showHint && <Text style={styles.songTitle}>{selectedSong.songTitle}</Text>} 
           </>
         )}
+ </ScrollView>
         <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={handleHintPress} style={styles.button}>
             <Text>Give up?</Text>

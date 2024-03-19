@@ -45,5 +45,8 @@ export const styles = StyleSheet.create({
             marginBottom: 15,
             textAlign: "center",
             color: '#000'
-        }
+        },
+        scrollView: {
+          maxHeight: '80%', 
+        },
   });
