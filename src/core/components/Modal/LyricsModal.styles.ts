@@ -2,7 +2,8 @@ import { Platform, StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     modalView: {
-        margin: 20,
+        marginLeft: 20,
+        marginRight: 20,
         marginTop: 60,
         backgroundColor: "white",
         borderRadius: 20,
@@ -30,15 +31,14 @@ export const styles = StyleSheet.create({
       },
       buttonContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         width: '100%',
+        // marginHorizontal: 10,
       },
       button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-        backgroundColor: "#2196F3",
-        marginHorizontal: 10,
+       
+        // backgroundColor: "#2196F3",
+        // marginHorizontal: 10,
       },
         questionText: {
             fontSize: 24,

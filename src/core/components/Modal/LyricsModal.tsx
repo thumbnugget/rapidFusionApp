@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { styles } from './LyricsModal.styles';
+import Button from '../Button/Button';
 
 
 
@@ -86,15 +87,12 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ visible, onClose, onGo, lyric
         )}
  </ScrollView>
         <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handleHintPress} style={styles.button}>
-            <Text>Give up?</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleNotNow} style={styles.button}>
-            <Text>Not Now</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleGo} style={styles.button}>
-            <Text>Go</Text>
-          </TouchableOpacity>
+          <Button onPress={handleHintPress} mode="contained"  title="Give up?" style={styles.button}/>
+       
+          <Button onPress={handleNotNow} title="Not Now" style={styles.button}/>
+        
+          <Button onPress={handleGo} title="Go" style={styles.button}/>
+         
         </View>
       </View>
     </Modal>

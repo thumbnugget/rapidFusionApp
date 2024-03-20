@@ -10,8 +10,8 @@ const Button: React.FC<ButtonProps> = ({ title, onPress, mode = 'contained', sty
         onPress={() => onPress && onPress()} // Only call onPress if it's defined
         style={[styles.button, style]} 
         icon={icon}
-        labelStyle={{ color: '#000' }}
-      >
+        labelStyle={mode === 'contained' ? { color: '#FFF' } : { color: '#000' }} // White text for 'contained', black for others
+        >
         {title}
       </PaperButton>
     );
