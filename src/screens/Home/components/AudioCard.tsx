@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity ,Platform, PermissionsAndroid} from 'react-native';
 // import { IconButton } from 'react-native-paper';
 import { Card } from 'react-native-paper';
 import { styles } from './AudioCard.styles';
@@ -10,16 +10,23 @@ import AudioPlayer from '../../../core/components/AudioPlayer/AudioPlayer';
 import PlayIcon from '../../../assets/icons/play_arrow_white_24dp.svg'; // Assuming you have a play icon
 import PauseIcon from '../../../assets/icons/pause_white_24dp.svg';
 import DownloadIcon from '../../../assets/icons/file_download_black_24dp.svg';
+
+import { PERMISSIONS, request as requestPermissionRN, check } from 'react-native-permissions';
+
+import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system';
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import trackFile from '../../../assets/audio/DiggingtheGrave.mp3';
 const tracks = [
     {
       id: '1',
       title: 'Digging the Grave',
-      url: require('../../../assets/audio/DiggingtheGrave.mp3'),
+      asset: Asset.fromModule(trackFile),
     },
     {
       id: '2',
       title: 'Digging the Grave also',
-      url: require('../../../assets/audio/DiggingtheGrave.mp3'),
+      asset: Asset.fromModule(trackFile),
     },
     // Add more tracks as needed
   ];
@@ -41,6 +48,36 @@ const AudioCard: React.FC<AudioCardProps> = () => {
       : undefined;
   }, [sound]);
 
+
+  const requestPermission = async (type: 'PHOTOS' | 'FILES'): Promise<boolean> => {
+    let permission;
+    if (type === 'PHOTOS') {
+        permission = Platform.OS === 'android' 
+            ? PERMISSIONS.ANDROID.CAMERA
+            : PERMISSIONS.IOS.PHOTO_LIBRARY;
+    } else if (type === 'FILES') {
+        permission = Platform.OS === 'android' 
+            ? PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE
+            : PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY;
+    }
+
+    // Ensure permission is defined before proceeding
+    if (!permission) {
+        console.error('Permission type not found or not set');
+        return false;
+    }
+
+    try {
+        const granted = await requestPermissionRN(permission);
+        console.log(`Permission request for ${permission}: ${granted}`);
+        return granted === 'granted';
+    } catch (err) {
+        console.error('Error requesting permissions', err);
+        return false;
+    }
+};
+
+
   const handlePress = () => {
     setIsExpanded(!isExpanded);
   };
@@ -61,16 +98,79 @@ const AudioCard: React.FC<AudioCardProps> = () => {
       setCurrentPlaying(null);
     } else {
       // Play the new track
-      const { sound: newSound } = await Audio.Sound.createAsync(track.url);
+      const { sound: newSound } = await Audio.Sound.createAsync(track.asset);
       setSound(newSound);
       await newSound.playAsync();
       setCurrentPlaying(trackId);
     }
   };
-  const askDownloadPermission = async () => {
-    // Ask for permission to download
-  }
+ 
 
+  // const downloadAndSaveFile = async (asset: Asset, fileName: string): Promise<void> => {
+  //   try {
+  //     // Ensure the asset is loaded
+  //     await asset.downloadAsync();
+  
+  //     // Check if localUri is not null
+  //     if (asset.localUri) {
+  //       // Save the asset to the media library; this will convert it to a type the MediaLibrary understands
+  //       const mediaLibraryAsset = await MediaLibrary.createAssetAsync(asset.localUri);
+  
+  //       // Create or get the album and add the media library asset to it
+  //       const album = await MediaLibrary.getAlbumAsync('YourAlbumName');
+  //       if (album) {
+  //         await MediaLibrary.addAssetsToAlbumAsync([mediaLibraryAsset], album, false);
+  //       } else {
+  //         await MediaLibrary.createAlbumAsync('YourAlbumName', mediaLibraryAsset, false);
+  //       }
+  
+  //       console.log('File saved to album:', 'YourAlbumName');
+  //     } else {
+  //       // Handle the case where localUri is null
+  //       console.error('Asset localUri is null, cannot save to album');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error downloading or saving file:', error);
+  //   }
+  // };
+
+  
+  const downloadAndSaveFile = async (asset: Asset, fileName: string): Promise<void> => {
+    // Ensure the asset is properly loaded
+    await asset.downloadAsync();
+
+    if (!asset.localUri) {
+      console.error('Asset localUri is null, cannot save to album');
+      return;
+    }
+
+    // Request storage permissions
+    requestPermission('FILES');
+    const hasPermission = await requestPermission('FILES');
+    if (!hasPermission) {
+      console.log('Storage permission not granted');
+      return;
+    }
+  
+    // Proceed with saving the file using CameraRoll
+    try {
+      const savedUri = await CameraRoll.save(asset.localUri, { type: 'photo', album: 'YourAlbumName' });
+      console.log('File saved to album:', savedUri);
+    } catch (error) {
+      console.error('Error downloading or saving file:', error);
+    }
+  };
+
+  const handleDownload = async (trackId: string) => {
+    const track = tracks.find(t => t.id === trackId);
+    if (!track) return;
+
+    // Request permissions via Expo's MediaLibrary
+   
+
+    // Download and save the file
+    await downloadAndSaveFile(track.asset, `${track.title}.mp3`);
+  };
   const renderItem = ({ item }: { item: Track }) => (
     <View style={styles.itemContainer}>
        <Button 
@@ -80,7 +180,7 @@ const AudioCard: React.FC<AudioCardProps> = () => {
         mode="contained" 
       />
       <Button 
-        onPress={askDownloadPermission} // Replace with actual download function
+        onPress={() => handleDownload(item.id)} // Replace with actual download function
         icon={() => <DownloadIcon />} // Replace with actual music note icon component
         mode="text" 
         
@@ -113,5 +213,6 @@ interface AudioCardProps {
   interface Track {
     id: string;
     title: string;
-    url: any; // Use appropriate type for your URL
+    asset?: Asset;  // Make asset optional if some tracks don't have it
+    url?: any;      // Consider using a more specific type here if possible
   }

@@ -21,21 +21,14 @@ export const styles = StyleSheet.create({
         marginLeft: 20,
       },
      
-     
-    
-     
-      
-      
       itemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: 10,
-        // Additional styles if needed
+       
       },
-      // trackTitle: {
-      //   // Styles for the track title
-      // },
+     
      
      
   });
