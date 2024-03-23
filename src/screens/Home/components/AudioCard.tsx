@@ -1,21 +1,18 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity ,Platform, PermissionsAndroid} from 'react-native';
-// import { IconButton } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, Text, StyleSheet, PermissionsAndroid,Platform, Alert} from 'react-native';
 import { Card } from 'react-native-paper';
 import { styles } from './AudioCard.styles';
 import { Audio } from 'expo-av';
 import Button from '../../../core/components/Button/ButtonIcon';
-import AudioPlayer from '../../../core/components/AudioPlayer/AudioPlayer';
-import PlayIcon from '../../../assets/icons/play_arrow_white_24dp.svg'; // Assuming you have a play icon
+import PlayIcon from '../../../assets/icons/play_arrow_white_24dp.svg'; 
 import PauseIcon from '../../../assets/icons/pause_white_24dp.svg';
 import DownloadIcon from '../../../assets/icons/file_download_black_24dp.svg';
-
-import { PERMISSIONS, request as requestPermissionRN, check } from 'react-native-permissions';
-
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import forAppImage from '../../../assets/forApp.png';
 import trackFile from '../../../assets/audio/DiggingtheGrave.mp3';
 const tracks = [
     {
@@ -31,12 +28,8 @@ const tracks = [
     // Add more tracks as needed
   ];
 
-  
-
-
 const AudioCard: React.FC<AudioCardProps> = () => {
     const audioTitle = 'Audio Tracks';
-  const [isExpanded, setIsExpanded] = useState(true);
   const [currentPlaying, setCurrentPlaying] = useState<string | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
@@ -48,39 +41,7 @@ const AudioCard: React.FC<AudioCardProps> = () => {
       : undefined;
   }, [sound]);
 
-
-  const requestPermission = async (type: 'PHOTOS' | 'FILES'): Promise<boolean> => {
-    let permission;
-    if (type === 'PHOTOS') {
-        permission = Platform.OS === 'android' 
-            ? PERMISSIONS.ANDROID.CAMERA
-            : PERMISSIONS.IOS.PHOTO_LIBRARY;
-    } else if (type === 'FILES') {
-        permission = Platform.OS === 'android' 
-            ? PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE
-            : PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY;
-    }
-
-    // Ensure permission is defined before proceeding
-    if (!permission) {
-        console.error('Permission type not found or not set');
-        return false;
-    }
-
-    try {
-        const granted = await requestPermissionRN(permission);
-        console.log(`Permission request for ${permission}: ${granted}`);
-        return granted === 'granted';
-    } catch (err) {
-        console.error('Error requesting permissions', err);
-        return false;
-    }
-};
-
-
-  const handlePress = () => {
-    setIsExpanded(!isExpanded);
-  };
+// ** Play/Pause Functionality **
 
   const playPauseTrack = async (trackId: string) => {
     const track = tracks.find(t => t.id === trackId);
@@ -104,86 +65,123 @@ const AudioCard: React.FC<AudioCardProps> = () => {
       setCurrentPlaying(trackId);
     }
   };
+//!! Download Functionality
+// const handleDownload = async (trackId: string) => {
+//   const track = tracks.find((t) => t.id === trackId);
+//   if (!track?.asset?.uri) {
+//     console.error('Track or track URI not found');
+//     return;
+//   }
+
+//   // Simplified permission request logic
+//   const hasPermission = await requestPermission();
+
+//   if (!hasPermission) {
+//     console.log('Storage permission denied');
+//     return;
+//   }
+
+//   try {
+//     const fileUri = `${FileSystem.documentDirectory}${track.title.replace(/\s/g, '')}.mp3`;
+//     const { uri } = await FileSystem.downloadAsync(track.asset.uri, fileUri);
+//     console.log('Downloaded to', uri);
+//   } catch (error) {
+//     console.error('Error downloading the file:', error);
+//   }
+// };
+
+// const requestPermission = async (): Promise<boolean> => {
+//   let permission = await check(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
+//   if (permission === RESULTS.GRANTED) {
+//     return true;
+//   }
+
+//   // Request permission if not already granted
+//   permission = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
+//   return permission === RESULTS.GRANTED;
+// };
+
  
+//!! Download Functionality
+const checkPermissionAndDownload = async () => {
+  let hasPermission = true;
+  // For Android, request permission at runtime.
+  if (Platform.OS === 'android') {
+    hasPermission = await requestStoragePermission();
+  }
 
-  // const downloadAndSaveFile = async (asset: Asset, fileName: string): Promise<void> => {
-  //   try {
-  //     // Ensure the asset is loaded
-  //     await asset.downloadAsync();
-  
-  //     // Check if localUri is not null
-  //     if (asset.localUri) {
-  //       // Save the asset to the media library; this will convert it to a type the MediaLibrary understands
-  //       const mediaLibraryAsset = await MediaLibrary.createAssetAsync(asset.localUri);
-  
-  //       // Create or get the album and add the media library asset to it
-  //       const album = await MediaLibrary.getAlbumAsync('YourAlbumName');
-  //       if (album) {
-  //         await MediaLibrary.addAssetsToAlbumAsync([mediaLibraryAsset], album, false);
-  //       } else {
-  //         await MediaLibrary.createAlbumAsync('YourAlbumName', mediaLibraryAsset, false);
-  //       }
-  
-  //       console.log('File saved to album:', 'YourAlbumName');
-  //     } else {
-  //       // Handle the case where localUri is null
-  //       console.error('Asset localUri is null, cannot save to album');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error downloading or saving file:', error);
-  //   }
-  // };
+  if (hasPermission) {
+    onDownloadPress();
+  } else {
+    Alert.alert("Storage Permission Denied", "You need to grant storage permissions to download photos.");
+  }
+};
 
-  
-  const downloadAndSaveFile = async (asset: Asset, fileName: string): Promise<void> => {
-    // Ensure the asset is properly loaded
+const requestStoragePermission = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: "Storage Permission Required",
+          message: "This app needs access to your storage to save images.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  }
+  // No need to request permission for iOS
+  return true;
+};
+
+const onDownloadPress = async () => {
+  try {
+    const asset = Asset.fromModule(forAppImage);
     await asset.downloadAsync();
 
-    if (!asset.localUri) {
-      console.error('Asset localUri is null, cannot save to album');
-      return;
+    const localUri = asset.localUri;
+    if (!localUri) {
+      throw new Error('Asset is not available locally');
     }
 
-    // Request storage permissions
-    requestPermission('FILES');
-    const hasPermission = await requestPermission('FILES');
-    if (!hasPermission) {
-      console.log('Storage permission not granted');
-      return;
-    }
-  
-    // Proceed with saving the file using CameraRoll
-    try {
-      const savedUri = await CameraRoll.save(asset.localUri, { type: 'photo', album: 'YourAlbumName' });
-      console.log('File saved to album:', savedUri);
-    } catch (error) {
-      console.error('Error downloading or saving file:', error);
-    }
-  };
+    const savedUri = await CameraRoll.save(localUri, { type: 'photo' });
+    console.log('Image saved to gallery:', savedUri);
 
-  const handleDownload = async (trackId: string) => {
-    const track = tracks.find(t => t.id === trackId);
-    if (!track) return;
+    Alert.alert("Download Success", "Image has been saved to your gallery.");
+  } catch (error) {
+    console.error('Error saving the image to gallery:', error);
+    Alert.alert("Download Error", "There was an error saving the image.");
+  }
+};
 
-    // Request permissions via Expo's MediaLibrary
-   
 
-    // Download and save the file
-    await downloadAndSaveFile(track.asset, `${track.title}.mp3`);
-  };
+
+
+  //**Render item below here */
   const renderItem = ({ item }: { item: Track }) => (
     <View style={styles.itemContainer}>
        <Button 
         title={item.title}
         onPress={() => playPauseTrack(item.id)}
-        icon={() => currentPlaying === item.id ? <PauseIcon /> : <PlayIcon />} // Pass a function that returns the icon component
+        icon={() => currentPlaying === item.id ? <PauseIcon /> : <PlayIcon />}  
         mode="contained" 
       />
-      <Button 
+      {/* <Button 
         onPress={() => handleDownload(item.id)} // Replace with actual download function
-        icon={() => <DownloadIcon />} // Replace with actual music note icon component
+        icon={() => <DownloadIcon />} 
         mode="text" 
         
+      /> */}
+      <Button
+        onPress={checkPermissionAndDownload}
+        icon={() => <DownloadIcon />}
+        mode="text"
       />
     </View>
   );
@@ -196,6 +194,7 @@ const AudioCard: React.FC<AudioCardProps> = () => {
             data={tracks}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
+            
           />
        
      

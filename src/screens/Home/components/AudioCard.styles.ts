@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     card: {
+     
         margin: 10,
         padding: 10,
         paddingLeft: 0,
@@ -22,6 +23,7 @@ export const styles = StyleSheet.create({
       },
      
       itemContainer: {
+       
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
